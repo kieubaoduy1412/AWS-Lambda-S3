@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/encoding-japanese/1.0.30/encoding.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:100,300'>
+    <style>
+        /* Modal */
+        
+        .input-container {
+            margin-top: 15px;
+            display: -ms-flexbox;
+            /* IE10 */
+            display: flex;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .icon {
+            padding: 15px;
+            background: dodgerblue;
+            color: white;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            outline: none;
+        }
+        
+        .input-field:focus {
+            border: 2px solid dodgerblue;
+        }
+        
+        .modal {
+            text-align: center;
+        }
+        
+        .modal-error {
+            color: red;
+        }
+        
+        @media screen and (min-width: 768px) {
+            .modal:before {
+                display: inline-block;
+                vertical-align: middle;
+                content: " ";
+                height: 100%;
+            }
+        }
+        
+        .modal-dialog {
+            display: inline-block;
+            text-align: left;
+            vertical-align: middle;
+        }
+        
+        .modal-title {
+            color: red;
+        }
+        
+        #fileNameInputText {
+            display: inline-block;
+        }
+        
+        #FileNameInModal {
+            display: inline-block;
+            color: red;
+        }
+        
+        .ajax-loader {
+            visibility: hidden;
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: url('https://hpscans.com/wp-content/uploads/2020/10/loading.gif') 50% 50% no-repeat rgb(255, 255, 255, 0.7);
+        }
+        
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        #contents {
+            display: none;
+        }
+        
+        .footer-button {
+            display: none;
+            background-color: #00a2e6;
+            border-style: none;
+            border-radius: 4px;
+            padding: 7px 10px;
+            color: white;
+        }
+        
+        #error-message {
+            color: red;
+            font-weight: bold;
+            display: none;
+        }
+        
+        #ok-message {
+            color: rgb(0, 119, 255);
+            font-weight: bold;
+            display: none;
+        }
+        
+        .fa-cloud-upload {
+            font-size: 45px !important;
+        }
+        
+        .choosedFile {
+            -webkit-transition: 1s;
+            -moz-transition: 1s;
+            -ms-transition: 1s;
+            -o-transition: 1s;
+            transition: 1s;
+            color: #00a2e6 !important;
+        }
+        
+        .showButton {
+            -webkit-transition: 3s;
+            -moz-transition: 3s;
+            -ms-transition: 3s;
+            -o-transition: 3s;
+            transition: 3s;
+            display: inline-block !important;
+        }
+        
+        #formUploadButton {
+            margin-left: 10px;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: -webkit-gradient(linear, left bottom, left top, from(#4F6072), to(#8699AA));
+            background: linear-gradient(to top, #4F6072, #8699AA);
+            display: -webkit-box;
+            display: flex;
+            -webkit-box-pack: center;
+            justify-content: center;
+            -webkit-box-align: center;
+            align-items: center;
+        }
+        
+        .upload {
+            position: relative;
+            width: 400px;
+            min-height: 445px;
+            box-sizing: border-box;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            padding-bottom: 20px;
+            background: #fff;
+            -webkit-animation: fadeup .5s .5s ease both;
+            animation: fadeup .5s .5s ease both;
+            -webkit-transform: translateY(20px);
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        
+        .upload .upload-files header {
+            background: #00a2e6;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            text-align: center;
+        }
+        
+        .upload .upload-files header p {
+            color: #fff;
+            font-size: 28px;
+            margin: 0;
+            padding: 50px 0;
+        }
+        
+        .upload .upload-files header p i {
+            -webkit-transform: translateY(20px);
+            transform: translateY(20px);
+            opacity: 0;
+            font-size: 30px;
+            -webkit-animation: fadeup .5s 1s ease both;
+            animation: fadeup .5s 1s ease both;
+        }
+        
+        .upload .upload-files header p .up {
+            font-weight: bold;
+            -webkit-transform: translateX(-20px);
+            transform: translateX(-20px);
+            display: inline-block;
+            opacity: 0;
+            -webkit-animation: faderight .5s 1.5s ease both;
+            animation: faderight .5s 1.5s ease both;
+        }
+        
+        .upload .upload-files header p .load {
+            display: inline-block;
+            font-weight: 100;
+            margin-left: -8px;
+            -webkit-transform: translateX(-20px);
+            transform: translateX(-20px);
+            opacity: 0;
+            -webkit-animation: faderight 1s 1.5s ease both;
+            animation: faderight 1s 1.5s ease both;
+        }
+        
+        .upload .upload-files .body {
+            text-align: center;
+            padding: 50px 0;
+            padding-bottom: 30px;
+        }
+        
+        .upload .upload-files .body.hidden {
+            display: none;
+        }
+        
+        .upload .upload-files .body input {
+            visibility: hidden;
+        }
+        
+        .upload .upload-files .body i {
+            font-size: 65px;
+            color: lightgray;
+        }
+        
+        .upload .upload-files .body p {
+            font-size: 14px;
+            padding-top: 15px;
+            line-height: 1.4;
+        }
+        
+        .upload .upload-files .body p b,
+        .upload .upload-files .body p a {
+            color: #00a2e6;
+        }
+        
+        .upload .upload-files .body.active {
+            border: dashed 2px #00a2e6;
+        }
+        
+        .upload .upload-files .body.active i {
+            box-shadow: 0 0 0 -3px #fff, 0 0 0 lightgray, 0 0 0 -3px #fff, 0 0 0 lightgray;
+            -webkit-animation: file .5s ease both;
+            animation: file .5s ease both;
+        }
+        
+        @-webkit-keyframes file {
+            50% {
+                box-shadow: -8px 8px 0 -3px #fff, -8px 8px 0 lightgray, -8px 8px 0 -3px #fff, -8px 8px 0 lightgray;
+            }
+            75%,
+            100% {
+                box-shadow: -8px 8px 0 -3px #fff, -8px 8px 0 lightgray, -16px 16px 0 -3px #fff, -16px 16px 0 lightgray;
+            }
+        }
+        
+        @keyframes file {
+            50% {
+                box-shadow: -8px 8px 0 -3px #fff, -8px 8px 0 lightgray, -8px 8px 0 -3px #fff, -8px 8px 0 lightgray;
+            }
+            75%,
+            100% {
+                box-shadow: -8px 8px 0 -3px #fff, -8px 8px 0 lightgray, -16px 16px 0 -3px #fff, -16px 16px 0 lightgray;
+            }
+        }
+        
+        .upload .upload-files .body.active .pointer-none {
+            pointer-events: none;
+            font-size: 16px;
+        }
+        
+        .upload .upload-files footer {
+            width: 100%;
+            margin: 0 auto;
+            height: 0;
+        }
+        
+        .upload .upload-files footer .divider {
+            margin: 0 auto;
+            width: 0;
+            border-top: solid 4px #46aba1;
+            text-align: center;
+            overflow: hidden;
+            -webkit-transition: width .5s ease;
+            transition: width .5s ease;
+        }
+        
+        .upload .upload-files footer .divider span {
+            display: inline-block;
+            -webkit-transform: translateY(-25px);
+            transform: translateY(-25px);
+            font-size: 12px;
+            padding-top: 8px;
+        }
+        
+        .upload .upload-files footer.hasFiles {
+            height: auto;
+        }
+        
+        .upload .upload-files footer.hasFiles .divider {
+            width: 100%;
+        }
+        
+        .upload .upload-files footer.hasFiles .divider span {
+            -webkit-transform: translateY(0);
+            transform: translateY(0);
+            -webkit-transition: -webkit-transform .5s .5s ease;
+            transition: -webkit-transform .5s .5s ease;
+            transition: transform .5s .5s ease;
+            transition: transform .5s .5s ease, -webkit-transform .5s .5s ease;
+        }
+        
+        .upload .upload-files footer .list-files {
+            width: 320px;
+            margin: 0 auto;
+            margin-top: 15px;
+            padding-left: 5px;
+            text-align: center;
+            overflow-x: hidden;
+            overflow-y: auto;
+            max-height: 210px;
+        }
+        
+        .upload .upload-files footer .list-files::-webkit-scrollbar-track {
+            background-color: rgba(211, 211, 211, 0.25);
+        }
+        
+        .upload .upload-files footer .list-files::-webkit-scrollbar {
+            width: 4px;
+            background-color: rgba(211, 211, 211, 0.25);
+        }
+        
+        .upload .upload-files footer .list-files::-webkit-scrollbar-thumb {
+            background-color: rgba(77, 182, 172, 0.5);
+        }
+        
+        .upload .upload-files footer .list-files .file {
+            width: 300px;
+            min-height: 50px;
+            display: -webkit-box;
+            display: flex;
+            -webkit-box-pack: justify;
+            justify-content: space-between;
+            -webkit-box-align: center;
+            align-items: center;
+            opacity: 0;
+            -webkit-animation: fade .35s ease both;
+            animation: fade .35s ease both;
+        }
+        
+        .upload .upload-files footer .list-files .file .name {
+            font-size: 12px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: 80px;
+            text-align: left;
+        }
+        
+        .upload .upload-files footer .list-files .file .progress {
+            width: 175px;
+            height: 5px;
+            border: solid 1px lightgray;
+            border-radius: 2px;
+            background: -webkit-gradient(linear, right top, left top, from(rgba(77, 182, 172, 0.2)), to(rgba(77, 182, 172, 0.8))) no-repeat;
+            background: linear-gradient(to left, rgba(77, 182, 172, 0.2), rgba(77, 182, 172, 0.8)) no-repeat;
+            background-size: 100% 100%;
+        }
+        
+        .upload .upload-files footer .list-files .file .progress.active {
+            -webkit-animation: progress 30s linear;
+            animation: progress 30s linear;
+        }
+        
+        @-webkit-keyframes progress {
+            from {
+                background-size: 0 100%;
+            }
+            to {
+                background-size: 100% 100%;
+            }
+        }
+        
+        @keyframes progress {
+            from {
+                background-size: 0 100%;
+            }
+            to {
+                background-size: 100% 100%;
+            }
+        }
+        
+        .upload .upload-files footer .list-files .file .done {
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            background: #4db6ac;
+            border-radius: 50%;
+            margin-left: -10px;
+            -webkit-transform: scale(0);
+            transform: scale(0);
+            position: relative;
+        }
+        
+        .upload .upload-files footer .list-files .file .done:before {
+            content: "View";
+            position: absolute;
+            top: 0;
+            left: -5px;
+            font-size: 24px;
+            opacity: 0;
+        }
+        
+        .upload .upload-files footer .list-files .file .done:hover:before {
+            -webkit-transition: all .25s ease;
+            transition: all .25s ease;
+            top: -30px;
+            opacity: 1;
+        }
+        
+        .upload .upload-files footer .list-files .file .done.anim {
+            -webkit-animation: done1 .5s ease forwards;
+            animation: done1 .5s ease forwards;
+        }
+        
+        .upload .upload-files footer .list-files .file .done.anim #path {
+            -webkit-animation: done2 2.5s .5s ease forwards;
+            animation: done2 2.5s .5s ease forwards;
+        }
+        
+        .upload .upload-files footer .list-files .file .done #path {
+            stroke-dashoffset: 7387.59423828125;
+            stroke-dasharray: 7387.59423828125 7387.59423828125;
+            stroke: #fff;
+            fill: transparent;
+            stroke-width: 50px;
+        }
+        
+        @-webkit-keyframes done2 {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        
+        @keyframes done2 {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        
+        @-webkit-keyframes done1 {
+            50% {
+                -webkit-transform: scale(0.5);
+                transform: scale(0.5);
+                opacity: 1;
+            }
+            80% {
+                -webkit-transform: scale(0.25);
+                transform: scale(0.25);
+                opacity: 1;
+            }
+            100% {
+                -webkit-transform: scale(0.5);
+                transform: scale(0.5);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes done1 {
+            50% {
+                -webkit-transform: scale(0.5);
+                transform: scale(0.5);
+                opacity: 1;
+            }
+            80% {
+                -webkit-transform: scale(0.25);
+                transform: scale(0.25);
+                opacity: 1;
+            }
+            100% {
+                -webkit-transform: scale(0.5);
+                transform: scale(0.5);
+                opacity: 1;
+            }
+        }
+        
+        .upload .upload-files footer .importar {
+            outline: none;
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 20px;
+            margin: auto;
+            border: solid 1px #4db6ac;
+            color: #4db6ac;
+            background: transparent;
+            padding: 8px 15px;
+            font-size: 12px;
+            border-radius: 4px;
+            font-family: Roboto;
+            line-height: 1;
+            cursor: pointer;
+            -webkit-transform: translateY(15px);
+            transform: translateY(15px);
+            opacity: 0;
+            visibility: hidden;
+            margin-left: calc(50% - 40px);
+        }
+        
+        .upload .upload-files footer .importar.active {
+            -webkit-transition: opacity .5s 1.5s ease, background, -webkit-transform .5s 1.5s ease;
+            transition: opacity .5s 1.5s ease, background, -webkit-transform .5s 1.5s ease;
+            transition: transform .5s 1.5s ease, opacity .5s 1.5s ease, background;
+            transition: transform .5s 1.5s ease, opacity .5s 1.5s ease, background, -webkit-transform .5s 1.5s ease;
+            -webkit-transform: translateY(0);
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .upload .upload-files footer .importar:hover {
+            background: #4db6ac;
+            color: #fff;
+        }
+        
+        @-webkit-keyframes fadeup {
+            to {
+                -webkit-transform: translateY(0);
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeup {
+            to {
+                -webkit-transform: translateY(0);
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @-webkit-keyframes faderight {
+            to {
+                -webkit-transform: translateX(0);
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes faderight {
+            to {
+                -webkit-transform: translateX(0);
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @-webkit-keyframes fade {
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fade {
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .upload {
+                width: 100%;
+                height: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ajax-loader">
+    </div>
+
+    <div class="upload">
+        <div class="upload-files">
+            <header>
+                <p>
+                    <i class="fa fa-cloud-upload" aria-hidden="true"></i>
+                    <span class="up">ファイルアップロード</span>
+                </p>
+            </header>
+            <div class="body" id="drop">
+                <i class="fa fa-file-text-o pointer-none" id="icon-show" aria-hidden="true"></i>
+                <p id="memo" class="pointer-none"></p>
+                <p class="pointer-none" id="description">ファイルをアップロードのために <br /> <a href="#" id="triggerFile" onclick="document.getElementById('myFile').click()">こちらに</a>クリックしファイルを選択してください</p>
+                <input type="file" id="myFile" size="50" onchange='onChooseFile(event)'>
+                <p class="pointer-none" id='error-message'>アップロードが失敗しました。</p>
+                <p class="pointer-none" id='ok-message'>データベースに保存しました。</p>
+                <div>
+                    <button type="button" id="chooseFileButton" class="footer-button" onclick="document.getElementById('myFile').click()">ファイル選択</button>
+                    <button type="button" id="formUploadButton" class="footer-button" onclick="checkFileNameValid()">アップロード</button>
+                </div>
+            </div>
+
+            <footer>
+                <div class="divider">
+                    <span>
+            <AR>FILES</AR>
+          </span>
+                </div>
+                <div class="list-files">
+                    <!--   template   -->
+                </div>
+                <button class="importar">UPDATE FILES</button>
+                <p id="contents"></p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- The Modal -->
+    <div class="modal" id="myModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">既に同名のファイルが存在しています</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div id='FileNameInModal'></div>というファイル名が存在します。上書きしますか？
+                    <br>又は、ファイル名を変更しますか？
+                    <div class="input-container">
+                        <i class="fa fa-file-text icon"></i>
+                        <input class="input-field" type="text" placeholder="ファイル名" id="modalFileNameInput">
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="uploadFile(fileName)" id="overwriteButton">上書き</button>
+                    <button type="button" class="btn btn-primary" onclick="changeName()" id="changeNameFileButton">ファイル名を変更</button>
+                    <button type="button" class="btn btn-primary" onclick="modalUploadFile()" id="uploadFileButton">アップロード</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+</body>
+<script>
+    /* 初期処理 */
+    var fileName;
+    var formdata;
+    var file;
+    var mainUrl = "XXX";
+
+    // 選択したファイル中身を読み込む
+    function readChoosedFile() {
+        var x = document.getElementById("myFile");
+        var txt = "";
+        if ('files' in x) {
+            if (x.files.length == 0) {
+                txt = "csvファイルを選択してください。";
+                $('#error-message').css('display', 'none');
+                $('#ok-message').css('display', 'none');
+            } else {
+                formdata = new FormData();
+                for (var i = 0; i < x.files.length; i++) {
+                    //txt += "<br><strong>" + (i+1) + ". file</strong><br>";
+                    var file = x.files[i];
+                    if ('name' in file) {
+                        txt += "ファイル名: <div id='fileNameInputText'>" + file.name + "</div><br>";
+                        fileName = file.name;
+                    }
+                    if ('size' in file) {
+                        txt += "サイズ: " + file.size + " bytes <br>";
+                    }
+                }
+                $('#formUploadButton').addClass('showButton')
+                $('#chooseFileButton').addClass('showButton')
+                $('#icon-show').addClass('choosedFile')
+                $('#description').css('display', 'none');
+            }
+        } else {
+            if (x.value == "") {
+                txt += "csvファイルを選択してください。";
+            } else {
+                txt += "The files property is not supported by your browser!";
+                txt += "<br>The path of the selected file: " + x.value; // If the browser does not support the files property, it will return the path of the selected file instead. 
+            }
+        }
+        document.getElementById("memo").innerHTML = txt;
+    }
+
+    /* CSVファイルを選択する */
+    function onChooseFile(event) {
+        readChoosedFile()
+        if (typeof window.FileReader !== 'function')
+            throw ("The file API isn't supported on this browser.");
+        let input = event.target;
+        if (!input)
+            throw ("The browser does not properly implement the event object");
+        if (!input.files)
+            throw ("This browser does not support the `files` property of the file input.");
+        if (!input.files[0])
+            return undefined;
+        //CSV読み込むが正常の場合は「注意」ラベルを隠す
+        file = input.files[0];
+
+        document.getElementById('formUploadButton').disabled = false;
+        $('#formUploadButton').css('transition', '0s');
+        $('#formUploadButton').css('background-color', '#00a2e6');
+        $('#error-message').css('display', 'none');
+        $('#ok-message').css('display', 'none');
+    }
+
+
+    // Modal中でアップロードボタン
+    function modalUploadFile() {
+        var modalFileName = document.getElementById("modalFileNameInput").value;
+        uploadFileInModal(document.getElementById("modalFileNameInput").value)
+    }
+
+    // Modal中でファイル名変更ボタン
+    function changeName() {
+        document.getElementById('modalFileNameInput').disabled = false;
+        document.getElementById('modalFileNameInput').focus();
+        $('#overwriteButton').css('display', 'none');
+        $('#changeNameFileButton').css('display', 'none');
+        $('#uploadFileButton').css('display', 'inline-block');
+    }
+
+    // Modalを表示する
+    function showModal() {
+        document.getElementById('modalFileNameInput').value = fileName;
+        document.getElementById('modalFileNameInput').disabled = true;
+        document.getElementById('FileNameInModal').innerHTML = fileName;
+        $('#overwriteButton').css('display', 'inline-block');
+        $('#changeNameFileButton').css('display', 'inline-block');
+        $('#uploadFileButton').css('display', 'none');
+        $("#myModal").modal()
+    }
+
+    //StringをArrayに変換する
+    function str2Array(str) {
+        var array = [],
+            i, il = str.length;
+        for (i = 0; i < il; i++) array.push(str.charCodeAt(i));
+        return array;
+    }
+
+    var checkFileNameIsValid;
+
+    // ファイル名が存在しているかを確認する
+    function checkFileNameValid() {
+        $.ajax({
+            url: mainUrl,
+            type: "GET",
+            beforeSend: function() {
+                $('.ajax-loader').css("visibility", "visible");
+            },
+            crossDomain: true,
+            dataType: "json",
+            data: {
+                fileNameOfCSV: fileName
+            },
+            headers: {
+                "Content-Type": "application/json",
+            },
+            complete: function(response) {
+                // ファイル名がs3に存在している場合にはファイル名変更するModalを表示する
+                $('.ajax-loader').css("visibility", "hidden");
+                if (response.responseJSON.checkFileNameIsValid) {
+                    uploadFile(fileName);
+                } else {
+                    showModal();
+                }
+            },
+            error: function(xhr, status) {
+                $('.ajax-loader').css("visibility", "hidden");
+                $('#ok-message').css('display', 'none');
+                $('#error-message').css('display', 'inline-block');
+            }
+        });
+    }
+
+    // Modalでファイル名変更しアップロードする
+    function uploadFileInModal(str) {
+        $.ajax({
+            url: mainUrl,
+            type: "GET",
+            beforeSend: function() {
+                $('.ajax-loader').css("visibility", "visible");
+            },
+            crossDomain: true,
+            dataType: "json",
+            data: {
+                fileNameOfCSV: str
+            },
+            headers: {
+                "Content-Type": "application/json",
+            },
+            complete: function(response) {
+                // 変更済みファイル名もs3に存在している場合はファイル名変更用Modalを再表示する
+                if (response.responseJSON.checkFileNameIsValid) {
+                    uploadFile(str);
+                    document.getElementById('fileNameInputText').innerHTML = str
+                    $("#myModal").modal('hide');
+                } else {
+                    // 変更済みファイル名が表示する
+                    document.getElementById('FileNameInModal').innerHTML = document.getElementById("modalFileNameInput").value;
+                    document.getElementById('modalFileNameInput').disabled = true;
+                    fileName = document.getElementById("modalFileNameInput").value;
+                    document.getElementById('fileNameInputText').innerHTML = fileName;
+                    $('#overwriteButton').css('display', 'inline-block');
+                    $('#changeNameFileButton').css('display', 'inline-block');
+                    $('#uploadFileButton').css('display', 'none');
+                    $('.ajax-loader').css("visibility", "hidden");
+                }
+            },
+            error: function(xhr, status) {
+                $('.ajax-loader').css("visibility", "hidden");
+                $('#ok-message').css('display', 'none');
+                $('#error-message').css('display', 'inline-block');
+            }
+        });
+    }
+    /*テスト END*/
+
+    //ファイルをアップロードボタンを押下する
+    function uploadFile(StrFileName) {
+        $('.ajax-loader').css("visibility", "visible");
+        $("#myModal").modal('hide');
+
+        // S3のPresignURLを取得用CSVファイル名を準備
+        var ObjectTranferData = {
+            fileNameOfCSV: StrFileName
+        }
+        var dataTranferToAPI = JSON.stringify(ObjectTranferData)
+
+        // S3のPresignURLを取得APIを呼ぶ
+        $.ajax({
+            url: mainUrl,
+            type: 'POST',
+            data: dataTranferToAPI,
+            contentType: "application/json",
+            crossDomain: true,
+            dataType: 'json',
+            timeout: 100000,
+            success: function(response) {
+                if (response != 0) {
+                    formdata.append(file.name, file)
+                        // PresignURL軽油でファイルをS3に保存
+                    putFileToS3(response.upload_url, file)
+                } else {
+                    $('.ajax-loader').css("visibility", "hidden");
+                    $('#ok-message').css('display', 'none');
+                    $('#error-message').css('display', 'inline-block');
+                }
+            },
+            error: function(res) {
+                $('.ajax-loader').css("visibility", "hidden");
+                $('#ok-message').css('display', 'none');
+                $('#error-message').css('display', 'inline-block');
+            }
+        });
+
+    }
+
+    // PresignURL軽油でファイルをS3に保存機能
+    function putFileToS3(Strurl, file) {
+        console.log(Strurl)
+        $.ajax({
+            url: Strurl,
+            type: 'PUT',
+            data: file,
+            cache: false,
+            processData: false,
+            headers: {
+                "Content-Type": "text/csv"
+            },
+            success: function() {
+                $('.ajax-loader').css("visibility", "hidden");
+                $('#error-message').css('display', 'none');
+                $('#ok-message').css('display', 'inline-block');
+                document.getElementById('formUploadButton').disabled = true;
+                $('#formUploadButton').css('transition', '0s');
+                $('#formUploadButton').css('background-color', 'gray');
+            },
+            error: function(res) {
+                console.log(res)
+                $('.ajax-loader').css("visibility", "hidden");
+                $('#ok-message').css('display', 'none');
+                $('#error-message').css('display', 'inline-block');
+            }
+        });
+    }
+</script>
+</body>
+
+</html>
